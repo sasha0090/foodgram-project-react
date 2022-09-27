@@ -25,7 +25,12 @@ router_v1.register(
 router_v1.register(
     r"users/(?P<user_id>\d+)/subscribe",
     views.UserSubscribeViewSet,
-    basename="subscribe", )
+    basename="subscribe")
+
+router_v1.register(
+    r"users/subscriptions",
+    views.UserSubscribeViewSet,
+    basename="subscriptions")
 
 
 router_v1.register("tags", views.TagViewSet)

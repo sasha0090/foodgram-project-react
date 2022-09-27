@@ -9,7 +9,7 @@ from rest_framework.relations import SlugRelatedField
 
 from recipes import models
 from users.models import Subscribe
-
+from users.serializers import UserSerializer
 
 User = get_user_model()
 
@@ -48,17 +48,6 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):
         model = models.RecipeIngredients
 
 
-class UserSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
-
-    class Meta:
-        fields = ["email", "id", "username", "first_name", "last_name", "is_subscribed",]
-        model = User
-
-    def get_is_subscribed(self, obj):
-        return False
-
-
 class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     ingredients = RecipeIngredientsSerializer(
@@ -72,7 +61,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        # fields = "__all__"
         exclude = ('favorite', )
         model = models.Recipe
 
@@ -104,14 +92,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         return instance
 
-    def get_is_favorited(self, obj):
+    def get_is_favorited(self, recipe):
         user = self.context.get('request').user
-        is_favorited = models.FavoriteRecipe.objects.filter(recipe=obj, user=user).exists()
+        is_favorited = models.FavoriteRecipe.objects.filter(recipe=recipe, user=user).exists()
         return is_favorited
 
-    def get_is_in_shopping_cart(self, obj):
+    def get_is_in_shopping_cart(self, recipe):
         user = self.context.get('request').user
-        is_in_shopping_cart = models.ShoppingCart.objects.filter(recipe=obj, user=user).exists()
+        is_in_shopping_cart = models.ShoppingCart.objects.filter(recipe=recipe, user=user).exists()
         return is_in_shopping_cart
 
     def to_internal_value(self, data):
@@ -187,6 +175,13 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
             instance.recipe, context=context).data
 
 
+class PreviewRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для краткого отображения рецепта."""
+    class Meta:
+        model = models.Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class UserSubscribeSerializer(serializers.ModelSerializer):
     subscriber = SlugRelatedField(
         slug_field="username",
@@ -213,3 +208,16 @@ class UserSubscribeSerializer(serializers.ModelSerializer):
                 {'detail': 'Вы уже подписаны на автора'}
             )
         return super().create(validated_data)
+
+    def to_representation(self, instance):
+
+        request = self.context.get('request')
+        context = {'request': request}
+
+        author_data = UserSerializer(instance.author, context=context).data
+        recipes_data = PreviewRecipeSerializer(
+            instance.author.own_recipes.all(), many=True).data
+        author_data['recipes'] = recipes_data
+        author_data['recipes_count'] = len(author_data['recipes'])
+
+        return author_data

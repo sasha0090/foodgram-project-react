@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from users.models import Subscribe
 from . import mixins
 from .pagination import OnlyDataPagination
 from . import serializers
@@ -141,8 +142,8 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
     def delete(self, request, recipe_id):
         user = self.request.user
         recipe = get_object_or_404(Recipe, pk=recipe_id)
-        favorite = get_object_or_404(ShoppingCart, user=user, recipe=recipe)
-        favorite.delete()
+        cart = get_object_or_404(ShoppingCart, user=user, recipe=recipe)
+        cart.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -150,7 +151,7 @@ class UserSubscribeViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserSubscribeSerializer
 
     def get_queryset(self):
-        subscriber = self.request.user.subscriber.all()
+        subscriber = self.request.user.subscribers.all()
         return subscriber
 
     def perform_create(self, serializer):
@@ -158,3 +159,13 @@ class UserSubscribeViewSet(viewsets.ModelViewSet):
         title_data = {"subscriber": self.request.user, "author": author}
         if serializer.is_valid():
             serializer.save(**title_data)
+
+    @action(methods=['delete'], detail=True)
+    def delete(self, request, user_id):
+        user = self.request.user
+
+        author = get_object_or_404(User, pk=user_id)
+
+        subscribe = get_object_or_404(Subscribe, subscriber=user, author=author)
+        subscribe.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
