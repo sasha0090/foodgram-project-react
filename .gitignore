@@ -132,7 +132,7 @@ dmypy.json
 .idea
 
 
-./backend/media/
-./backend/users/migrations/
-./backend/recipes/migrations/
-./backend/api/migrations/
+backend/media/
+backend/users/migrations/
+backend/recipes/migrations/
+backend/api/migrations/
