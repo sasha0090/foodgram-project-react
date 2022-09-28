@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework import routers
 
 from . import views
@@ -10,7 +10,11 @@ router_v1.register(
     views.ShoppingCartViewSet,
     basename="download_shopping_cart",
 )
-router_v1.register("recipes", views.RecipeViewSet, basename="recipes",)
+router_v1.register(
+    "recipes",
+    views.RecipeViewSet,
+    basename="recipes",
+)
 router_v1.register(
     r"recipes/(?P<recipe_id>\d+)/favorite",
     views.FavoriteViewSet,
@@ -25,12 +29,14 @@ router_v1.register(
 router_v1.register(
     r"users/(?P<user_id>\d+)/subscribe",
     views.UserSubscribeViewSet,
-    basename="subscribe")
+    basename="subscribe",
+)
 
 router_v1.register(
     r"users/subscriptions",
     views.UserSubscribeViewSet,
-    basename="subscriptions")
+    basename="subscriptions",
+)
 
 
 router_v1.register("tags", views.TagViewSet)
