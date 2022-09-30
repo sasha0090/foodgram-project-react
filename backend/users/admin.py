@@ -5,5 +5,11 @@ from users.models import Subscribe
 
 User = get_user_model()
 
-admin.site.register(User)
+
+@admin.register(User)
+class UsersAdmin(admin.ModelAdmin):
+    list_display = ["username", "email"]
+    search_fields = ["username", "email"]
+
+
 admin.site.register(Subscribe)

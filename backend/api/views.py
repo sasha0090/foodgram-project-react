@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -22,17 +23,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthorOrStaffOrReadOnly]
     queryset = models.Recipe.objects.all()
     serializer_class = serializers.RecipeSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = RecipeFilter
     filterset_fields = ["tags", "author__id"]
+    ordering = ['-create_date']
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
     @action(methods=["delete"], detail=True)
-    def delete(self, request, *args, **kwargs):
+    def delete(self, request, recipe_id):
         user = self.request.user
-        recipe = get_object_or_404(models.Recipe, pk=kwargs.get("pk"))
+        recipe = get_object_or_404(models.Recipe, pk=recipe_id)
         recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

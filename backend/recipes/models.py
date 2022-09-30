@@ -9,6 +9,10 @@ class Tag(models.Model):
     color = models.CharField("Цвет", max_length=7)
     slug = models.SlugField("Слаг", unique=True, max_length=30)
 
+    class Meta:
+        verbose_name = "Тег"
+        verbose_name_plural = "Теги"
+
     def __str__(self):
         return self.name
 
@@ -16,6 +20,10 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField("Название", max_length=30)
     measurement_unit = models.CharField("Ед. измерения", max_length=10)
+
+    class Meta:
+        verbose_name = "Ингредиенты"
+        verbose_name_plural = "Ингредиенты"
 
     def __str__(self):
         return self.name
@@ -40,6 +48,10 @@ class Recipe(models.Model):
         User, through="FavoriteRecipe", related_name="recipes"
     )
 
+    class Meta:
+        verbose_name = "Рецепт"
+        verbose_name_plural = "Рецепты"
+
     def __str__(self):
         return self.name
 
@@ -59,6 +71,8 @@ class FavoriteRecipe(models.Model):
                 name="unique_favorite",
             )
         ]
+        verbose_name = "Избранный рецепт"
+        verbose_name_plural = "Избранные рецепты"
 
     def __str__(self):
         return f"{self.recipe} - {self.user}"
@@ -80,6 +94,8 @@ class RecipeIngredients(models.Model):
                 name="unique_recipe_ingredient",
             )
         ]
+        verbose_name = "Ингредиент в рецепте"
+        verbose_name_plural = "Ингредиенты в рецепте"
 
     def __str__(self):
         return f"{self.amount}{self.ingredient.measurement_unit} - {self.ingredient} - {self.recipe} "
@@ -100,6 +116,9 @@ class ShoppingCart(models.Model):
                 name="unique_cart",
             )
         ]
+
+        verbose_name = "Список покупок"
+        verbose_name_plural = "Списки покупок"
 
     def __str__(self):
         return f"Продукты из {self.recipe} в корзине у {self.user}"
