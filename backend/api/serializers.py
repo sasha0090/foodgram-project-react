@@ -61,7 +61,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        exclude = ("favorite",)
+        exclude = ["favorite"]
         model = models.Recipe
 
     def create(self, validated_data):
@@ -98,9 +98,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
 
-        is_favorited = models.FavoriteRecipe.objects.filter(
-            recipe=recipe, user=user
-        ).exists()
+        is_favorited = recipe.favorite_recipes.filter(user=user).exists()
         return is_favorited
 
     def get_is_in_shopping_cart(self, recipe):
@@ -109,9 +107,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
 
-        is_in_shopping_cart = models.ShoppingCart.objects.filter(
-            recipe=recipe, user=user
-        ).exists()
+        is_in_shopping_cart = recipe.shopping_cart.filter(user=user).exists()
         return is_in_shopping_cart
 
     def to_internal_value(self, data):
@@ -143,12 +139,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         request = self.context.get("request")
         recipe_id = self.context.get("view").kwargs.get("recipe_id")
+        user = request.user
 
-        review = models.FavoriteRecipe.objects.filter(
-            recipe_id=recipe_id, user=request.user
-        ).exists()
+        is_favorite = user.favorite_recipes.filter(recipe_id=recipe_id).exists()
 
-        if review and request.method == "POST":
+        if is_favorite and request.method == "POST":
             raise ValidationError("Рецепт уже в избранном!")
         return attrs
 
@@ -169,12 +164,11 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         request = self.context.get("request")
         recipe_id = self.context.get("view").kwargs.get("recipe_id")
+        user = request.user
 
-        review = models.ShoppingCart.objects.filter(
-            recipe_id=recipe_id, user=request.user
-        ).exists()
+        in_cart = user.shopping_cart.filter(recipe_id=recipe_id).exists()
 
-        if review and request.method == "POST":
+        if in_cart and request.method == "POST":
             raise ValidationError("Рецепт уже в списке покупок!")
         return attrs
 
@@ -185,7 +179,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
 
 class PreviewRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для краткого отображения рецепта."""
+    """Краткое отображение рецепта."""
 
     class Meta:
         model = models.Recipe
@@ -218,7 +212,6 @@ class UserSubscribeSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def to_representation(self, instance):
-
         request = self.context.get("request")
         context = {"request": request}
 
@@ -226,7 +219,12 @@ class UserSubscribeSerializer(serializers.ModelSerializer):
         recipes_data = PreviewRecipeSerializer(
             instance.author.own_recipes.all(), many=True
         ).data
+        author_data["recipes_count"] = len(recipes_data)
+        recipes_limit = request.query_params.get('recipes_limit')
+        try:
+            if recipes_limit:
+                recipes_data = recipes_data[:int(recipes_limit)]
+        except ValueError:
+            raise ValidationError("Параметр recipes_limit должен быть числом!")
         author_data["recipes"] = recipes_data
-        author_data["recipes_count"] = len(author_data["recipes"])
-
         return author_data

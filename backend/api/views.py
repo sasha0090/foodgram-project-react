@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from . import mixins, serializers
 from .filters import CustomSearchFilter, RecipeFilter
 from .mixins import GetViewSet
-from .pagination import OnlyDataPagination
+from .pagination import LimitPagination, OnlyDataPagination
 from .permissions import IsAuthorOrStaffOrReadOnly
 from recipes import models
 from users.models import Subscribe
@@ -23,6 +23,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthorOrStaffOrReadOnly]
     queryset = models.Recipe.objects.all()
     serializer_class = serializers.RecipeSerializer
+    pagination_class = LimitPagination
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = RecipeFilter
     filterset_fields = ["tags", "author__id"]
@@ -44,6 +45,7 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = models.Tag.objects.all()
     serializer_class = serializers.TagSerializer
     pagination_class = OnlyDataPagination
+
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -145,8 +147,9 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
 
 
 class UserSubscribeViewSet(viewsets.ModelViewSet):
-    serializer_class = serializers.UserSubscribeSerializer
     permission_classes = [IsAuthenticated]
+    serializer_class = serializers.UserSubscribeSerializer
+    pagination_class = LimitPagination
 
     def get_queryset(self):
         subscriber = self.request.user.subscribers.all()
