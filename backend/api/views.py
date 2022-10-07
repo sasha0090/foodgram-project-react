@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
@@ -13,9 +12,9 @@ from .filters import CustomSearchFilter, RecipeFilter
 from .mixins import GetViewSet
 from .pagination import LimitPagination, OnlyDataPagination
 from .permissions import IsAuthorOrStaffOrReadOnly
+from .services import download_shopping_cart
 from recipes import models
 from users.models import Subscribe
-from .services import download_shopping_cart
 
 User = get_user_model()
 
@@ -28,14 +27,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = RecipeFilter
     filterset_fields = ["tags", "author__id"]
-    ordering = ['-create_date']
+    ordering = ["-create_date"]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
     @action(methods=["delete"], detail=True)
     def delete(self, request, recipe_id):
-        user = self.request.user
         recipe = get_object_or_404(models.Recipe, pk=recipe_id)
         recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

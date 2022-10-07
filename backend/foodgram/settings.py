@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,7 +14,9 @@ DEBUG = True
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(", ")
 
 CORS_URLS_REGEX = r"^/api/.*$"
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000",]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",

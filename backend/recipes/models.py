@@ -49,8 +49,9 @@ class Recipe(models.Model):
         Ingredient, through="RecipeIngredients", related_name="recipes"
     )
     tags = models.ManyToManyField(Tag, related_name="recipes")
-    cooking_time = models.IntegerField("Время приготовления",
-                                       validators=[MinValueValidator(1)])
+    cooking_time = models.IntegerField(
+        "Время приготовления", validators=[MinValueValidator(1)]
+    )
     create_date = models.DateTimeField(
         "Дата добавления", auto_now_add=True, blank=True
     )
@@ -97,8 +98,7 @@ class RecipeIngredients(models.Model):
         Ingredient, related_name="ingredientsamount", on_delete=models.CASCADE
     )
     amount = models.IntegerField(
-        "Количество",
-        validators=[MinValueValidator(1)]
+        "Количество", validators=[MinValueValidator(1)]
     )
 
     class Meta:
@@ -112,8 +112,10 @@ class RecipeIngredients(models.Model):
         verbose_name_plural = "Ингредиенты в рецепте"
 
     def __str__(self):
-        return (f"{self.amount}{self.ingredient.measurement_unit} - "
-                + f"{self.ingredient} - {self.recipe}")
+        return (
+            f"{self.amount}{self.ingredient.measurement_unit} - "
+            + f"{self.ingredient} - {self.recipe}"
+        )
 
 
 class ShoppingCart(models.Model):

@@ -70,9 +70,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 "Должен быть хотя бы один ингредиент"
             )
 
-        ingredient_ids = [
-            i["ingredient"]["id"] for i in ingredientsamounts
-        ]
+        ingredient_ids = [i["ingredient"]["id"] for i in ingredientsamounts]
 
         if len(set(ingredient_ids)) != len(ingredient_ids):
             raise serializers.ValidationError(
@@ -82,9 +80,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate_tags(self, tags):
         if not tags:
-            raise serializers.ValidationError(
-                "Укажи теги!"
-            )
+            raise serializers.ValidationError("Укажи теги!")
         return tags
 
     def create(self, validated_data):
@@ -243,10 +239,10 @@ class UserSubscribeSerializer(serializers.ModelSerializer):
             instance.author.own_recipes.all(), many=True
         ).data
         author_data["recipes_count"] = len(recipes_data)
-        recipes_limit = request.query_params.get('recipes_limit')
+        recipes_limit = request.query_params.get("recipes_limit")
         try:
             if recipes_limit:
-                recipes_data = recipes_data[:int(recipes_limit)]
+                recipes_data = recipes_data[: int(recipes_limit)]
         except ValueError:
             raise ValidationError("Параметр recipes_limit должен быть числом!")
         author_data["recipes"] = recipes_data
