@@ -64,24 +64,23 @@ class RecipeSerializer(serializers.ModelSerializer):
         exclude = ["favorite"]
         model = models.Recipe
 
-    def validate_ingredients(self, ingredientsamounts):
-        if not ingredientsamounts:
+    def validate(self, data):
+        if not data["tags"]:
+            raise serializers.ValidationError("Укажи теги!")
+
+        if not data["ingredientsamount"]:
             raise serializers.ValidationError(
                 "Должен быть хотя бы один ингредиент"
             )
 
-        ingredient_ids = [i["ingredient"]["id"] for i in ingredientsamounts]
-
+        ingredient_ids = [
+            i["ingredient"]["id"] for i in data["ingredientsamount"]
+        ]
         if len(set(ingredient_ids)) != len(ingredient_ids):
             raise serializers.ValidationError(
                 "Ингридиенты не должны повторяться"
             )
-        return ingredientsamounts
-
-    def validate_tags(self, tags):
-        if not tags:
-            raise serializers.ValidationError("Укажи теги!")
-        return tags
+        return data
 
     def create(self, validated_data):
         ingredients_amount_data = validated_data.pop("ingredientsamount")
