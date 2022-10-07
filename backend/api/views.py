@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse
+
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
@@ -15,6 +15,7 @@ from .pagination import LimitPagination, OnlyDataPagination
 from .permissions import IsAuthorOrStaffOrReadOnly
 from recipes import models
 from users.models import Subscribe
+from .services import download_shopping_cart
 
 User = get_user_model()
 
@@ -45,7 +46,6 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = models.Tag.objects.all()
     serializer_class = serializers.TagSerializer
     pagination_class = OnlyDataPagination
-
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -98,44 +98,7 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
         serializer.save(**title_data)
 
     def list(self, request, *args, **kwargs):
-        user = self.request.user
-        queryset = models.ShoppingCart.objects.filter(user=user)
-        total_ingredients = {}
-        for shopping_cart in queryset:
-            recipe = shopping_cart.recipe
-
-            recipe_ingredients = serializers.RecipeIngredientsSerializer(
-                recipe.ingredientsamount, many=True
-            ).data
-
-            for ingredient in recipe_ingredients:
-                name, amount = ingredient["name"], ingredient["amount"]
-                measurement_unit = ingredient["measurement_unit"]
-
-                if total_ingredients.get(name):
-                    total_ingredients[name] = {
-                        measurement_unit: total_ingredients[name][
-                            measurement_unit
-                        ]
-                        + amount
-                    }
-                else:
-                    total_ingredients[name] = {measurement_unit: amount}
-
-        filename = "my-file.txt"
-
-        content = ""
-
-        for ingredient in total_ingredients:
-            measurement_unit, amount = total_ingredients[ingredient].popitem()
-
-            content += f"{ingredient} ({measurement_unit}) — {amount}\n"
-
-        response = HttpResponse(content, content_type="text/plain")
-        response["Content-Disposition"] = "attachment; filename={0}".format(
-            filename
-        )
-        return response
+        return download_shopping_cart(self.request.user)
 
     @action(methods=["delete"], detail=True)
     def delete(self, request, recipe_id):

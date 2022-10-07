@@ -5,14 +5,15 @@ from . import models
 
 class IngredientInline(admin.TabularInline):
     model = models.RecipeIngredients
-    extra = 1
+    extra = 0
+    min_num = 1
 
 
 @admin.register(models.Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ["name", "author", "get_favorite"]
     list_filter = ["author", "tags"]
-    search_fields = ["name"]
+    search_fields = ["name", "author__username", "tags__name"]
     inlines = [IngredientInline]
 
     def get_favorite(self, obj):
