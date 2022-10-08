@@ -113,8 +113,7 @@ class UserSubscribeViewSet(viewsets.ModelViewSet):
     pagination_class = LimitPagination
 
     def get_queryset(self):
-        subscriber = self.request.user.subscribers.all()
-        return subscriber
+        return self.request.user.subscribers.all()
 
     def perform_create(self, serializer):
         author = get_object_or_404(User, pk=self.kwargs.get("user_id"))

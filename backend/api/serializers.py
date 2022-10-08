@@ -116,8 +116,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
 
-        is_favorited = recipe.favorite_recipes.filter(user=user).exists()
-        return is_favorited
+        return recipe.favorite_recipes.filter(user=user).exists()
 
     def get_is_in_shopping_cart(self, recipe):
         user = self.context.get("request").user
@@ -125,8 +124,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
 
-        is_in_shopping_cart = recipe.shopping_cart.filter(user=user).exists()
-        return is_in_shopping_cart
+        return recipe.shopping_cart.filter(user=user).exists()
 
     def to_internal_value(self, data):
         self.fields["tags"] = serializers.PrimaryKeyRelatedField(
@@ -159,7 +157,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
         recipe_id = self.context.get("view").kwargs.get("recipe_id")
         user = request.user
 
-        is_favorite = user.favorite_recipes.filter(recipe_id=recipe_id).exists()
+        is_favorite = user.favorite_recipes.filter(
+            recipe_id=recipe_id).exists()
 
         if is_favorite and request.method == "POST":
             raise ValidationError("Рецепт уже в избранном!")
