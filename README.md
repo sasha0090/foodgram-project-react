@@ -2,8 +2,11 @@
 # FoodGram - лучший продуктовый помощник ( ͡° ͜ʖ ͡°)
 ![foodgram workflow](https://github.com/sasha0090/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-[Приложение «Продуктовый помощник»](http://51.250.111.41/recipes): сайт, на котором пользователи могут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других пользователей. Сервис «Список покупок» позволяет пользователям создавать список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
-  
+Приложение «Продуктовый помощник»: сайт, на котором пользователи могут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других пользователей. Сервис «Список покупок» позволяет пользователям создавать список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
+
+http://51.250.111.41/recipes
+
+
 ## Описание проекта  
 Для бэкенда используется [Django](https://www.djangoproject.com), api написана помощью фреймворка [Django REST Framework](https://www.django-rest-framework.org).  Для основных действий по аутентификации используется библиотека [djoser](https://github.com/sunscrapers/djoser), таких как регистрация, вход/выход в систему, сброс пароля и др.
 
@@ -16,6 +19,58 @@
 -   Проект запущен на сервере в Яндекс.Облаке в Docker контейнера Контейнеры с проектом обновляется через Docker Hub.
 -   В nginx настроена раздача статики, остальные запросы переадресуются в Gunicorn.
 -   Данные сохраняются в volumes.
+
+&nbsp;
+
+## Стек технологий
+✅ Python
+✅ Django
+✅ Django REST framework
+✅ Postgres
+✅ Docker
+✅ Github Workflow
+✅ Nginx
+
+&nbsp;
+
+## Запуск проекта
+Создайте в директории infra .env файл с параметрами:
+```
+    DB_ENGINE=django.db.backends.postgresql  # указываем, что работаем с postgresql 
+    DB_NAME=postgres  # имя базы данных 
+    POSTGRES_USER=postgres  # логин для подключения к базе данных 
+    POSTGRES_PASSWORD=postgres  # пароль для подключения к БД (установите свой)
+    DB_HOST=db  # название сервиса (контейнера) 
+    DB_PORT=5432  # порт для подключения к БД
+    
+    ALLOWED_HOSTS=localhost #Ваши хосты
+    SECRET_KEY=KEY # ваш ключ
+```
+
+### Через Doсker
+Установите и настройте [Doсker](https://www.docker.com/products/docker-desktop/).
+Собрать контейнеры можно автоматическом режиме для этого достаточно клонировать только папку infra и заменив в файле docker-compose.yaml:
+
+◾ Запустите docker-compose:
+```
+docker-compose up -d --build
+```
+В соберите файлы статики, и запустите миграции командами:
+```
+docker-compose exec web python manage.py migrate
+docker-compose exec web python manage.py collectstatic --no-input 
+```
+
+◾ Создать суперпользователя можно командой:
+```
+docker-compose exec web python manage.py createsuperuser
+```
+◾ Остановить:
+```
+docker-compose down -v
+```
+
+&nbsp;
 
 ## Эндпоинты
 Список доступных эндпоинтов в проекте.
@@ -141,51 +196,8 @@
  - Подписаться на пользователя
  - Получение ингредиента
 
-## Стек технологий
-✅ Python
-✅ Django
-✅ Django REST framework
-✅ Postgres
-✅ Docker
-✅ Github Workflow
-✅ Nginx
+&nbsp;
 
-## Запуск проекта
-Создайте в директории infra .env файл с параметрами:
-```
-    DB_ENGINE=django.db.backends.postgresql  # указываем, что работаем с postgresql 
-    DB_NAME=postgres  # имя базы данных 
-    POSTGRES_USER=postgres  # логин для подключения к базе данных 
-    POSTGRES_PASSWORD=postgres  # пароль для подключения к БД (установите свой)
-    DB_HOST=db  # название сервиса (контейнера) 
-    DB_PORT=5432  # порт для подключения к БД
-    
-    ALLOWED_HOSTS=localhost #Ваши хосты
-    SECRET_KEY=KEY # ваш ключ
-```
-
-### Через Doсker
-Установите и настройте [Doсker](https://www.docker.com/products/docker-desktop/).
-Собрать контейнеры можно автоматическом режиме для этого достаточно клонировать только папку infra и заменив в файле docker-compose.yaml:
-
-◾ Запустите docker-compose:
-```
-docker-compose up -d --build
-```
-В соберите файлы статики, и запустите миграции командами:
-```
-docker-compose exec web python manage.py migrate
-docker-compose exec web python manage.py collectstatic --no-input 
-```
-
-◾ Создать суперпользователя можно командой:
-```
-docker-compose exec web python manage.py createsuperuser
-```
-◾ Остановить:
-```
-docker-compose down -v
-```
 ## Авторы
 
 Бэк - **[Александр Телепин](https://github.com/sasha0090)**
